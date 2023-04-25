@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AuthServices
 {
@@ -42,18 +43,21 @@ class AuthServices
      * Function to authenticate the user
      *
      * @param  array  $credentials
+     * @param  bool  $isVendor
      * @return mixed
      * @throws AuthException
+     * @throws Throwable
      */
-    public function handleLogin(array $credentials): mixed
+    public function handleLogin(array $credentials, bool $isVendor = false): mixed
     {
         if (!Auth::attempt($credentials)) {
             throw new AuthException('Invalid login details');
         }
 
         try {
-
             $user = User::where('email', $credentials['email'])->firstOrFail();
+
+            throw_if($isVendor && $user->role_name != 'vendor');
 
             return static::createAuthToken($user);
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Services\AuthServices;
 use Illuminate\Http\JsonResponse;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -21,10 +22,28 @@ class AuthController extends Controller
      * @param  LoginRequest  $request
      * @return JsonResponse
      * @throws AuthException
+     * @throws Throwable
      */
     public function login(LoginRequest $request): JsonResponse
     {
         $token = $this->authServices->handleLogin($request->only('email', 'password'));
+
+        return response()->json([
+            'access_token'  => $token,
+            'token_type'    => 'Bearer',
+        ]);
+    }
+
+    /**
+     * Login function for the vendor
+     *
+     * @param  LoginRequest  $request
+     * @return JsonResponse
+     * @throws AuthException|Throwable
+     */
+    public function vendorLogin(LoginRequest $request): JsonResponse
+    {
+        $token = $this->authServices->handleLogin($request->only('email', 'password'), true);
 
         return response()->json([
             'access_token'  => $token,
